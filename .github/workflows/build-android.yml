@@ -20,11 +20,15 @@ jobs:
       - name: Install dependencies
         run: npm install
 
-      - name: Install Capacitor CLI
+      - name: Add Android platform
         run: npx cap add android
 
       - name: Sync web assets
         run: npx cap sync android
+
+      - name: Fix AndroidManifest internet permission
+        run: |
+          sed -i 's/<application/<uses-permission android:name="android.permission.INTERNET"\/>\n    <application/' android/app/src/main/AndroidManifest.xml
 
       - name: Setup Java
         uses: actions/setup-java@v4

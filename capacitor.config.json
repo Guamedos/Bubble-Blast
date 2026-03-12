@@ -1,0 +1,13 @@
+{
+  "appId": "com.tuempresa.bubbleblast",
+  "appName": "Bubble Blast",
+  "webDir": ".",
+  "server": {
+    "androidScheme": "https"
+  },
+  "plugins": {
+    "AdMob": {
+      "appId": "ca-app-pub-XXXXXXXXXXXXXXXX~XXXXXXXXXX"
+    }
+  }
+}

@@ -32,8 +32,8 @@ window.onerror = function(msg, src, line, col, err) {
 <script src="https://cdnjs.cloudflare.com...
 <script src="https://cdnjs.cloudflare.com/ajax/libs/phaser/3.60.0/phaser.min.js"></script>
 <script>
-const GW    = window.screen.width;
-const GH    = window.screen.height;
+const GW    = window.innerWidth  || 400;
+const GH    = window.innerHeight || 700;
 const COLS  = 8;
 const R     = 22;
 const D     = R * 2;
@@ -2068,7 +2068,12 @@ new Phaser.Game({
   width: GW, height: GH,
   backgroundColor: '#08081a',
   scene: [MenuScene, GameScene, CustomizeScene],
-  scale: { mode: Phaser.Scale.FIT, autoCenter: Phaser.Scale.CENTER_BOTH },
+  scale: {
+    mode: Phaser.Scale.NONE,
+    autoCenter: Phaser.Scale.CENTER_BOTH,
+    width: GW,
+    height: GH,
+  },
   parent: document.body,
 });
 </script>

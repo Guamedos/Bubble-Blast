@@ -1,7 +1,7 @@
 {
   "appId": "com.tuempresa.bubbleblast",
   "appName": "Bubble Blast",
-  "webDir": ".",
+  "webDir": "www",
   "server": {
     "androidScheme": "https"
   },

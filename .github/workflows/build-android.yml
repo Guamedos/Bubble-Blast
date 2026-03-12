@@ -42,6 +42,8 @@ jobs:
           sed -i 's/<application/<uses-permission android:name="android.permission.INTERNET"\/>\n    <application/' android/app/src/main/AndroidManifest.xml
           sed -i 's/<application/<application android:networkSecurityConfig="@xml\/network_security_config"/' android/app/src/main/AndroidManifest.xml
 
+      - name: Show AndroidManifest
+        run: cat android/app/src/main/AndroidManifest.xml
       - name: Setup Java
         uses: actions/setup-java@v4
         with:

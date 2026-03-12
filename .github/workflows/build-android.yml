@@ -47,6 +47,10 @@ jobs:
           sed -i 's/<application/<uses-permission android:name="android.permission.INTERNET"\/>\n    <application/' android/app/src/main/AndroidManifest.xml
           sed -i 's/<application/<application android:networkSecurityConfig="@xml\/network_security_config"/' android/app/src/main/AndroidManifest.xml
 
+      - name: Inject AdMob App ID into AndroidManifest
+        run: |
+          sed -i 's|</application>|<meta-data android:name="com.google.android.gms.ads.APPLICATION_ID" android:value="ca-app-pub-5311690528161092~2390433268"/>\n    </application>|' android/app/src/main/AndroidManifest.xml
+
       - name: Show AndroidManifest
         run: cat android/app/src/main/AndroidManifest.xml
       - name: Setup Java

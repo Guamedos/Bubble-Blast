@@ -29,24 +29,11 @@ window.onerror = function(msg, src, line, col, err) {
   el.innerHTML = '<b>ERROR:</b><br>' + msg + '<br><br>Archivo: ' + src + '<br>Línea: ' + line + '<br><br>' + (err ? err.stack : '');
 };
 </script>
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-  var el = document.getElementById('error-overlay');
-  el.style.display = 'block';
-  el.style.background = 'rgba(0,0,0,0.85)';
-  el.innerHTML = 'innerWidth: ' + window.innerWidth + '<br>' +
-                 'innerHeight: ' + window.innerHeight + '<br>' +
-                 'screen.width: ' + window.screen.width + '<br>' +
-                 'screen.height: ' + window.screen.height + '<br>' +
-                 'devicePixelRatio: ' + window.devicePixelRatio;
-  setTimeout(function() { el.style.display = 'none'; }, 5000);
-});
-</script>
 <script src="https://cdnjs.cloudflare.com...
 <script src="https://cdnjs.cloudflare.com/ajax/libs/phaser/3.60.0/phaser.min.js"></script>
 <script>
-const GW    = window.innerWidth  || 400;
-const GH    = window.innerHeight || 700;
+const GW    = 400;
+const GH    = 700;
 const COLS  = 8;
 const R     = 22;
 const D     = R * 2;
@@ -2082,10 +2069,8 @@ new Phaser.Game({
   backgroundColor: '#08081a',
   scene: [MenuScene, GameScene, CustomizeScene],
   scale: {
-    mode: Phaser.Scale.NONE,
+    mode: Phaser.Scale.EXPAND,
     autoCenter: Phaser.Scale.CENTER_BOTH,
-    width: GW,
-    height: GH,
   },
   parent: document.body,
 });

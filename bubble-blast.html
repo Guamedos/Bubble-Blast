@@ -10,34 +10,26 @@
   html, body {
     width: 100%; height: 100%;
     background: #0a0a1a;
-    display: flex;
-    justify-content: center;
-    align-items: center;
     overflow: hidden;
     position: fixed;
     top: 0; left: 0;
   }
-  canvas { display: block; touch-action: none; }
- #game-container, canvas {
+  #game-container {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100vw;
+    height: 100vh;
+  }
+  #game-container canvas {
+    display: block;
+    touch-action: none;
     width: 100vw !important;
     height: 100vh !important;
-    position: fixed !important;
-    top: 0 !important;
-    left: 0 !important;
   }
 </style>
 </head>
 <body>
-<div id="error-overlay" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:#000;color:#fff;font-size:14px;padding:20px;z-index:99999;overflow:auto;word-break:break-all;"></div>
 <div id="game-container"></div>
-<script>
-window.onerror = function(msg, src, line, col, err) {
-  var el = document.getElementById('error-overlay');
-  el.style.display = 'block';
-  el.innerHTML = '<b>ERROR:</b><br>' + msg + '<br><br>Archivo: ' + src + '<br>Línea: ' + line + '<br><br>' + (err ? err.stack : '');
-};
-</script>
-<script src="https://cdnjs.cloudflare.com...
 <script src="https://cdnjs.cloudflare.com/ajax/libs/phaser/3.60.0/phaser.min.js"></script>
 <script>
 const GW    = 400;
@@ -109,13 +101,13 @@ const STRINGS = {
     dbg_complete:     '🏆 completar',
     dbg_timer:        (s, a, m, d) => `próxima fila: ${s}s  (${a}/${m}) [${d}s]`,
     // Customize
-    customize_title:  '🎨  APARIENCIA',
+    customize_title:  'APARIENCIA',
     tab_bubbles:      'Burbujas',
     tab_bg:           'Fondo',
     btn_back:         '← Volver',
     set_names:        ['Clásico', 'Cristal', 'Flat'],
     // Options overlay
-    options_title:    '⚙️  OPCIONES',
+    options_title:    'OPCIONES',
     sound_on:         '🔊  Sonido',
     sound_off:        '🔇  Sonido',
     btn_close:        'Cerrar',
@@ -150,13 +142,13 @@ const STRINGS = {
     dbg_complete:     '🏆 complete',
     dbg_timer:        (s, a, m, d) => `next row: ${s}s  (${a}/${m}) [${d}s]`,
     // Customize
-    customize_title:  '🎨  APPEARANCE',
+    customize_title:  'APPEARANCE',
     tab_bubbles:      'Bubbles',
     tab_bg:           'Background',
     btn_back:         '← Back',
     set_names:        ['Classic', 'Crystal', 'Flat'],
     // Options overlay
-    options_title:    '⚙️  OPTIONS',
+    options_title:    'OPTIONS',
     sound_on:         '🔊  Sound',
     sound_off:        '🔇  Sound',
     btn_close:        'Close',
@@ -415,8 +407,8 @@ let currentLevel = parseInt(localStorage.getItem('bb_level') || '1', 10);
 //   ADMOB_APP_ID        → capacitor.config.json > plugins > AdMob > appId
 //   ADMOB_INTERSTITIAL  → ID de bloque de anuncio intersticial
 //   ADMOB_REWARDED      → ID de bloque de anuncio recompensado
-const ADMOB_INTERSTITIAL_ID = 'ca-app-pub-5311690528161092/1608164209';
-const ADMOB_REWARDED_ID     = 'ca-app-pub-5311690528161092/4944298620';
+const ADMOB_INTERSTITIAL_ID = 'ca-app-pub-XXXXXXXXXXXXXXXX/XXXXXXXXXX';
+const ADMOB_REWARDED_ID     = 'ca-app-pub-XXXXXXXXXXXXXXXX/XXXXXXXXXX';
 
 const Ads = {
   // Anuncio intersticial (saltable tras 5s). onDismissed se llama siempre.
@@ -448,6 +440,54 @@ const Ads = {
     }
   },
 };
+
+// ─── ICON HELPERS ────────────────────────────────────────────────────────────
+
+function drawGearIcon(gfx, cx, cy, r) {
+  const teeth = 8;
+  const innerR = r * 0.55;
+  const outerR = r;
+  const toothW = Math.PI / teeth * 0.5;
+  gfx.fillStyle(0xffd700, 0.9);
+  gfx.beginPath();
+  for (let i = 0; i < teeth; i++) {
+    const a1 = (i / teeth) * Math.PI * 2 - toothW;
+    const a2 = (i / teeth) * Math.PI * 2 + toothW;
+    const a3 = ((i + 0.5) / teeth) * Math.PI * 2 - toothW * 0.5;
+    const a4 = ((i + 0.5) / teeth) * Math.PI * 2 + toothW * 0.5;
+    if (i === 0) gfx.moveTo(cx + Math.cos(a1) * innerR, cy + Math.sin(a1) * innerR);
+    else         gfx.lineTo(cx + Math.cos(a1) * innerR, cy + Math.sin(a1) * innerR);
+    gfx.lineTo(cx + Math.cos(a1) * outerR, cy + Math.sin(a1) * outerR);
+    gfx.lineTo(cx + Math.cos(a2) * outerR, cy + Math.sin(a2) * outerR);
+    gfx.lineTo(cx + Math.cos(a2) * innerR, cy + Math.sin(a2) * innerR);
+    gfx.lineTo(cx + Math.cos(a3) * innerR, cy + Math.sin(a3) * innerR);
+    gfx.lineTo(cx + Math.cos(a4) * innerR, cy + Math.sin(a4) * innerR);
+  }
+  gfx.closePath();
+  gfx.fillPath();
+  // Center hole
+  gfx.fillStyle(0x18181b, 1);
+  gfx.fillCircle(cx, cy, r * 0.28);
+}
+
+function drawPaletteIcon(gfx, cx, cy, r) {
+  // Palette oval body
+  gfx.fillStyle(0xffd700, 0.9);
+  gfx.fillEllipse(cx, cy, r * 1.8, r * 1.6);
+  // Thumb hole
+  gfx.fillStyle(0x18181b, 1);
+  gfx.fillCircle(cx + r * 0.45, cy + r * 0.3, r * 0.28);
+  // Color dots
+  const dotColors = [0xe74c3c, 0x3498db, 0x2ecc71, 0xf39c12, 0x9b59b6];
+  const dotPositions = [
+    [-r*0.45, -r*0.35], [r*0.45, -r*0.35],
+    [-r*0.6, r*0.1],    [r*0.0, -r*0.5],  [r*0.55, r*0.1],
+  ];
+  for (let i = 0; i < dotColors.length; i++) {
+    gfx.fillStyle(dotColors[i], 1);
+    gfx.fillCircle(cx + dotPositions[i][0], cy + dotPositions[i][1], r * 0.18);
+  }
+}
 
 // ─── MENU SCENE ──────────────────────────────────────────────────────────────
 class MenuScene extends Phaser.Scene {
@@ -615,7 +655,7 @@ class MenuScene extends Phaser.Scene {
     const palG = this.add.graphics();
     palG.fillStyle(0x18181b, 0.9); palG.fillCircle(W-34, H-34, 24);
     palG.lineStyle(1.5, 0xffd700, 0.6); palG.strokeCircle(W-34, H-34, 24);
-    this.add.text(W-34, H-34, '🎨', { fontSize: '20px' }).setOrigin(0.5);
+    drawPaletteIcon(palG, W-34, H-34, 13);
     this.add.zone(W-34, H-34, 48, 48).setInteractive({ useHandCursor: true })
       .on('pointerdown', () => this.scene.start('Customize'));
 
@@ -623,7 +663,7 @@ class MenuScene extends Phaser.Scene {
     const optG = this.add.graphics();
     optG.fillStyle(0x18181b, 0.9); optG.fillCircle(34, H-34, 24);
     optG.lineStyle(1.5, 0xffd700, 0.6); optG.strokeCircle(34, H-34, 24);
-    this.add.text(34, H-34, '⚙️', { fontSize: '20px' }).setOrigin(0.5);
+    drawGearIcon(optG, 34, H-34, 13);
     this.add.zone(34, H-34, 48, 48).setInteractive({ useHandCursor: true })
       .on('pointerdown', () => showOptionsOverlay(this));
 
@@ -966,7 +1006,7 @@ class GameScene extends Phaser.Scene {
     const optG = this.add.graphics().setDepth(21);
     optG.fillStyle(0x000000, 0.35); optG.fillCircle(this.W/2, 18, 14);
     optG.lineStyle(1, 0xffd700, 0.4); optG.strokeCircle(this.W/2, 18, 14);
-    this.add.text(this.W/2, 18, '⚙️', { fontSize: '14px' }).setOrigin(0.5).setDepth(22);
+    drawGearIcon(optG, this.W/2, 18, 8);
     this.add.zone(this.W/2, 18, 28, 28).setInteractive({ useHandCursor: true }).setDepth(23)
       .on('pointerdown', () => showOptionsOverlay(this));
 
@@ -1005,7 +1045,9 @@ class GameScene extends Phaser.Scene {
     painterGfx.strokeRoundedRect(px2 - 28, py2 - 28, 56, 56, 12);
     painterGfx.lineStyle(1.5, 0xffd700, 1);
     painterGfx.strokeRoundedRect(px2 - 26, py2 - 26, 52, 52, 11);
-    this.painterIconTxt  = this.add.text(px2, py2 - 6, '🎨', { fontSize: '24px' }).setOrigin(0.5).setDepth(23);
+    this.painterIconGfx = this.add.graphics().setDepth(23);
+    drawPaletteIcon(this.painterIconGfx, px2, py2 - 8, 11);
+    this.painterIconTxt  = this.add.text(px2, py2 - 8, '', { fontSize: '22px' }).setOrigin(0.5).setDepth(23);
     this.painterCountTxt = this.add.text(px2, py2 + 16, `x${this.painterCharges}`, {
       fontSize: '13px', fontFamily: 'Georgia,serif', fontStyle: 'bold',
       color: '#86efac', stroke: '#000', strokeThickness: 3
@@ -1029,6 +1071,93 @@ class GameScene extends Phaser.Scene {
     gfx.fillStyle(col,alpha);          gfx.fillCircle(x,y,R-1);
     gfx.fillStyle(0xffffff,0.3*alpha); gfx.fillCircle(x-R*.28,y-R*.28,R*.32);
     gfx.lineStyle(1.5,0xffffff,0.2*alpha); gfx.strokeCircle(x,y,R-1);
+  }
+
+  // Bakes a bomb texture to a canvas key so it can be reused as an image
+  _getBombTexture() {
+    const key = 'bomb_sprite';
+    if (this.textures.exists(key)) return key;
+    const size = D * 2;
+    const c = document.createElement('canvas');
+    c.width = size; c.height = size;
+    const ctx = c.getContext('2d');
+    const cx = size / 2, cy = size / 2;
+    const r = R * 1.1; // almost full cell size
+
+    // Shadow
+    ctx.save();
+    ctx.shadowColor = 'rgba(0,0,0,0.7)';
+    ctx.shadowBlur = 10;
+    ctx.shadowOffsetX = 4; ctx.shadowOffsetY = 5;
+
+    // Main sphere — radial gradient for 3D look
+    const grad = ctx.createRadialGradient(cx - r*0.35, cy - r*0.35, r*0.05, cx, cy, r);
+    grad.addColorStop(0,   '#666666');
+    grad.addColorStop(0.35,'#222222');
+    grad.addColorStop(1,   '#000000');
+    ctx.fillStyle = grad;
+    ctx.beginPath(); ctx.arc(cx, cy, r, 0, Math.PI*2); ctx.fill();
+    ctx.restore();
+
+    // Rim highlight
+    ctx.strokeStyle = 'rgba(140,140,140,0.35)';
+    ctx.lineWidth = 1.5;
+    ctx.beginPath(); ctx.arc(cx, cy, r, 0, Math.PI*2); ctx.stroke();
+
+    // Specular highlight top-left
+    const spec = ctx.createRadialGradient(cx - r*0.4, cy - r*0.4, 0, cx - r*0.4, cy - r*0.4, r*0.45);
+    spec.addColorStop(0,   'rgba(255,255,255,0.6)');
+    spec.addColorStop(1,   'rgba(255,255,255,0)');
+    ctx.fillStyle = spec;
+    ctx.beginPath(); ctx.arc(cx, cy, r, 0, Math.PI*2); ctx.fill();
+
+    // Fuse base — small cap on top-right of sphere
+    const fuseBaseX = cx + r * 0.6;
+    const fuseBaseY = cy - r * 0.6;
+    ctx.fillStyle = '#666';
+    ctx.beginPath(); ctx.arc(fuseBaseX, fuseBaseY, 4, 0, Math.PI*2); ctx.fill();
+    ctx.fillStyle = '#999';
+    ctx.beginPath(); ctx.arc(fuseBaseX, fuseBaseY, 2.5, 0, Math.PI*2); ctx.fill();
+
+    // Fuse cord — short curve going top-right, stays within canvas
+    ctx.strokeStyle = '#8B4513';
+    ctx.lineWidth = 2.5;
+    ctx.lineCap = 'round';
+    ctx.beginPath();
+    ctx.moveTo(fuseBaseX, fuseBaseY);
+    ctx.bezierCurveTo(fuseBaseX + 6, fuseBaseY - 8, fuseBaseX + 4, fuseBaseY - 14, fuseBaseX + 2, fuseBaseY - 18);
+    ctx.stroke();
+
+    // Fuse highlight
+    ctx.strokeStyle = 'rgba(180,120,60,0.5)';
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.moveTo(fuseBaseX + 1, fuseBaseY);
+    ctx.bezierCurveTo(fuseBaseX + 7, fuseBaseY - 8, fuseBaseX + 5, fuseBaseY - 14, fuseBaseX + 3, fuseBaseY - 18);
+    ctx.stroke();
+
+    // Spark at fuse tip — contained within canvas
+    const sx = fuseBaseX + 2, sy2 = fuseBaseY - 18;
+    const sparkColors = ['#FFD700','#FF8C00','#FF4500','#ffffff'];
+    for (let i = 0; i < 8; i++) {
+      const angle = (i / 8) * Math.PI * 2;
+      const len = 2.5 + Math.random() * 3;
+      ctx.strokeStyle = sparkColors[i % sparkColors.length];
+      ctx.lineWidth = 1.2;
+      ctx.beginPath();
+      ctx.moveTo(sx, sy2);
+      ctx.lineTo(sx + Math.cos(angle) * len, sy2 + Math.sin(angle) * len);
+      ctx.stroke();
+    }
+    // Spark glow
+    const glowGrad = ctx.createRadialGradient(sx, sy2, 0, sx, sy2, 5);
+    glowGrad.addColorStop(0, 'rgba(255,200,0,0.9)');
+    glowGrad.addColorStop(1, 'rgba(255,100,0,0)');
+    ctx.fillStyle = glowGrad;
+    ctx.beginPath(); ctx.arc(sx, sy2, 5, 0, Math.PI*2); ctx.fill();
+
+    this.textures.addCanvas(key, c);
+    return key;
   }
 
   _spawnBubbleImg(x, y, colorIdx, alpha=1) {
@@ -1209,12 +1338,11 @@ class GameScene extends Phaser.Scene {
     this._savedNxt   = this.nxtColor;
     // Redraw shooter showing bomb in hand
     this._drawShooterBase();
-    this.shooterGfx.fillStyle(0x111111, 1); this.shooterGfx.fillCircle(this.sx, this.sy+14, R-1);
-    this.shooterGfx.lineStyle(2, 0xff4444, 1); this.shooterGfx.strokeCircle(this.sx, this.sy+14, R-1);
-    this.shooterGfx.fillStyle(0xffffff, 0.15); this.shooterGfx.fillCircle(this.sx-R*.28, this.sy+14-R*.28, R*.32);
-    // Hide the current bubble sprite so bomb emoji is visible on top
+    // Hide the current bubble sprite and show real bomb image
     if (this._curBubImg) this._curBubImg.setVisible(false);
-    this.bombHandLabel = this.add.text(this.sx, this.sy+14, '💣', { fontSize: '22px' }).setOrigin(0.5).setDepth(10);
+    const bombKey = this._getBombTexture();
+    if (this.bombHandImg) this.bombHandImg.destroy();
+    this.bombHandImg = this.add.image(this.sx, this.sy+14, bombKey).setDisplaySize(D, D).setDepth(10);
   }
 
   _nextBubble() {
@@ -1297,7 +1425,7 @@ class GameScene extends Phaser.Scene {
     const color   = this.curColor;
     const isBomb  = !!this.isBomb;
     this.isBomb   = false;
-    if (this.bombHandLabel) { this.bombHandLabel.destroy(); this.bombHandLabel = null; }
+    if (this.bombHandImg) { this.bombHandImg.destroy(); this.bombHandImg = null; }
     const speed = 11;
     let bx=this.sx, by=this.sy+14, vx=dx*speed, vy=dy*speed;
     const lw=BOARD_LEFT+R, rw=BOARD_LEFT+COLS*D-R;
@@ -1305,9 +1433,8 @@ class GameScene extends Phaser.Scene {
     this.flyGfx.clear();
     let flyImg = null;
     if (isBomb) {
-      this.flyGfx.fillStyle(0x111111, 1); this.flyGfx.fillCircle(0, 0, R-1);
-      this.flyGfx.lineStyle(2, 0xff4444, 1); this.flyGfx.strokeCircle(0, 0, R-1);
-      this.flyGfx.x=bx; this.flyGfx.y=by;
+      const bombKey = this._getBombTexture();
+      flyImg = this.add.image(bx, by, bombKey).setDisplaySize(D, D).setDepth(5);
     } else {
       const fk = 'bubble_' + color;
       if (this.textures.exists(fk)) {
@@ -1317,14 +1444,13 @@ class GameScene extends Phaser.Scene {
         this.flyGfx.x=bx; this.flyGfx.y=by;
       }
     }
-    // bomb emoji label on flying bomb
-    const bombLabel = isBomb ? this.add.text(0, 0, '💣', { fontSize:'20px' }).setOrigin(0.5).setDepth(11) : null;
+    // flying bomb uses flyImg sprite, no separate label needed
+    const bombLabel = null;
 
     const step = () => {
       if (this.isDead) {
         this.flyGfx.clear(); this.flyGfx.x=0; this.flyGfx.y=0;
         if (flyImg) { flyImg.destroy(); flyImg=null; }
-        if (bombLabel) bombLabel.destroy();
         this.shooting=false; this._redrawShooter(); return;
       }
       bx+=vx; by+=vy;
@@ -1332,7 +1458,6 @@ class GameScene extends Phaser.Scene {
       if(bx>=rw){bx=rw-(bx-rw);vx=-vx;}
       this.flyGfx.x=bx; this.flyGfx.y=by;
       if (flyImg) { flyImg.x=bx; flyImg.y=by; }
-      if (bombLabel) { bombLabel.x=bx; bombLabel.y=by; }
 
       // Collision
       let hit = false;
@@ -1345,7 +1470,6 @@ class GameScene extends Phaser.Scene {
       if (hit || topHit) {
         this.flyGfx.clear(); this.flyGfx.x=0; this.flyGfx.y=0;
         if (flyImg) { flyImg.destroy(); flyImg=null; }
-        if (bombLabel) bombLabel.destroy();
 
         if (isBomb) {
           this._onBombLanded(bx, by);
@@ -1686,7 +1810,9 @@ class CustomizeScene extends Phaser.Scene {
     this._drawBg();
 
     // Title
-    this.add.text(W/2, 28, T().customize_title, {
+    const titleGfx = this.add.graphics();
+    drawPaletteIcon(titleGfx, W/2 - 68, 28, 10);
+    this.add.text(W/2 + 6, 28, T().customize_title, {
       fontSize:'20px', fontFamily:'Georgia,serif', fontStyle:'bold',
       color:'#e2e8f0', stroke:'#000', strokeThickness:3
     }).setOrigin(0.5);
@@ -1947,7 +2073,11 @@ function showOptionsOverlay(scene) {
   objs.push(panel);
 
   // Title
-  const title = scene.add.text(px, py - ph/2 + 30, T().options_title, {
+  const titleY = py - ph/2 + 30;
+  const titleGfx = scene.add.graphics().setDepth(D+2);
+  drawGearIcon(titleGfx, px - 62, titleY, 9);
+  objs.push(titleGfx);
+  const title = scene.add.text(px + 4, titleY, T().options_title, {
     fontSize: '18px', fontFamily: 'Georgia,serif', fontStyle: 'bold',
     color: '#ffd700', stroke: '#000', strokeThickness: 3
   }).setOrigin(0.5).setDepth(D+2);
@@ -2080,6 +2210,8 @@ new Phaser.Game({
     mode: Phaser.Scale.FIT,
     autoCenter: Phaser.Scale.CENTER_BOTH,
     parent: 'game-container',
+    width: GW,
+    height: GH,
   },
 });
 </script>

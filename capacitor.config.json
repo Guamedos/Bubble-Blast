@@ -11,8 +11,6 @@
     }
   },
   "android": {
-    "webContentsDebuggingEnabled": false,
-    "appendUserAgent": "BubbleBlast/2"
     "allowMixedContent": true,
     "backgroundColor": "#0a0a1a"
   }

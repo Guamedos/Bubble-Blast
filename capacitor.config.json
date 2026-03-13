@@ -9,5 +9,9 @@
     "AdMob": {
       "appId": "ca-app-pub-5311690528161092~2390433268"
     }
+  },
+  "android": {
+    "allowMixedContent": true,
+    "backgroundColor": "#0a0a1a"
   }
 }
